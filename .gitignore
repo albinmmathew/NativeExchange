@@ -41,11 +41,17 @@ improvements.md
 project_blueprint.md
 submission_document.md
 
-# Generated Docs
+# Generated & Local Files
 submission_document.docx
+manifest.mf
+generate_docx.py
+DB.txt
+NativeExchange.lnk
+SRS.docx
+STEPS.docx
+Class Diagram.png
 
 # Personal 
-steps.docx
 08_ALBIN_MAMMEN_MATHEW.pdf
 
 # System/Misc
