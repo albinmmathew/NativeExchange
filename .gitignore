@@ -1,0 +1,56 @@
+# NetBeans
+build/
+dist/
+nbproject/private/
+nbproject/genfiles.properties
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+
+# Build & Dependencies
+target/
+*.log
+
+# Database & Local Files
+*.db
+*.sqlite
+*.sqlite3
+.env
+
+# Assistant/Brain Artifacts
+task.md
+walkthrough.md
+implementation_plan.md
+analysis_results.md
+functionalities.md
+improvements.md
+project_blueprint.md
+submission_document.md
+
+# Generated Docs
+submission_document.docx
+
+# Personal 
+steps.docx
+08_ALBIN_MAMMEN_MATHEW.pdf
+
+# System/Misc
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.gemini/

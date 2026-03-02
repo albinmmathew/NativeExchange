@@ -1,0 +1,199 @@
+# 📊 DATABASE TABLES & THEIR ATTRIBUTES
+
+---
+
+## 1️⃣ ROLES
+
+**Purpose:** Stores user roles for role-based access control.
+
+| Attribute      | Type         | Description               |
+| -------------- | ------------ | ------------------------- |
+| `role_id` (PK) | NUMBER       | Unique role identifier    |
+| `role_name`    | VARCHAR2(20) | ADMIN / VENDOR / CUSTOMER |
+
+CREATE TABLE roles (
+    role_id NUMBER PRIMARY KEY,
+    role_name VARCHAR2(20) UNIQUE NOT NULL
+);
+
+---
+
+## 2️⃣ USERS
+
+**Purpose:** Stores authentication and user identity information.
+
+| Attribute      | Type         | Description               |
+| -------------- | ------------ | ------------------------- |
+| `user_id` (PK) | NUMBER       | Unique user ID            |
+| `username`     | VARCHAR2(30) | Login username            |
+| `password`     | VARCHAR2(64) | Hashed password (SHA-256) |
+| `role_id` (FK) | NUMBER       | References ROLES(role_id) |
+| `status`       | VARCHAR2(10) | ACTIVE / INACTIVE         |
+
+CREATE TABLE users (
+    user_id NUMBER PRIMARY KEY,
+    username VARCHAR2(30) UNIQUE NOT NULL,
+    password VARCHAR2(64) NOT NULL,
+    role_id NUMBER NOT NULL,
+    status VARCHAR2(10) DEFAULT 'ACTIVE',
+
+    CONSTRAINT fk_users_role
+        FOREIGN KEY (role_id)
+        REFERENCES roles(role_id)
+);
+
+CREATE SEQUENCE seq_users
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+---
+
+## 3️⃣ CATEGORIES
+
+**Purpose:** Classifies listings into logical groups.
+
+| Attribute          | Type         | Description        |
+| ------------------ | ------------ | ------------------ |
+| `category_id` (PK) | NUMBER       | Unique category ID |
+| `category_name`    | VARCHAR2(30) | Category name      |
+
+
+CREATE TABLE categories (
+    category_id NUMBER PRIMARY KEY,
+    category_name VARCHAR2(30) UNIQUE NOT NULL
+);
+---
+
+## 4️⃣ LISTING_STATUS
+
+**Purpose:** Controls lifecycle of listings.
+
+| Attribute        | Type         | Description               |
+| ---------------- | ------------ | ------------------------- |
+| `status_id` (PK) | NUMBER       | Unique status ID          |
+| `status_name`    | VARCHAR2(20) | AVAILABLE / SOLD / CLOSED |
+
+CREATE TABLE listing_status (
+    status_id NUMBER PRIMARY KEY,
+    status_name VARCHAR2(20) UNIQUE NOT NULL
+);
+---
+
+## 5️⃣ LISTINGS (CORE TABLE)
+
+**Purpose:** Stores vendor product listings.
+
+| Attribute          | Type         | Description                          |
+| ------------------ | ------------ | ------------------------------------ |
+| `listing_id` (PK)  | NUMBER       | Unique listing ID                    |
+| `vendor_id` (FK)   | NUMBER       | References USERS(user_id)            |
+| `category_id` (FK) | NUMBER       | References CATEGORIES(category_id)   |
+| `item_name`        | VARCHAR2(50) | Product name                         |
+| `quantity`         | NUMBER       | Available quantity                   |
+| `location`         | VARCHAR2(50) | Locality                             |
+| `status_id` (FK)   | NUMBER       | References LISTING_STATUS(status_id) |
+| `created_date`     | DATE         | Date of creation                     |
+
+CREATE TABLE listings (
+    listing_id NUMBER PRIMARY KEY,
+    vendor_id NUMBER NOT NULL,
+    category_id NUMBER NOT NULL,
+    item_name VARCHAR2(50) NOT NULL,
+    quantity NUMBER CHECK (quantity >= 0),
+    location VARCHAR2(50),
+    status_id NUMBER NOT NULL,
+    created_date DATE DEFAULT SYSDATE,
+
+    CONSTRAINT fk_listing_vendor
+        FOREIGN KEY (vendor_id)
+        REFERENCES users(user_id),
+
+    CONSTRAINT fk_listing_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(category_id),
+
+    CONSTRAINT fk_listing_status
+        FOREIGN KEY (status_id)
+        REFERENCES listing_status(status_id)
+);
+
+CREATE SEQUENCE seq_listings
+START WITH 7
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+---
+
+## 6️⃣ REQUEST_STATUS
+
+**Purpose:** Tracks request processing state.
+
+| Attribute        | Type         | Description                   |
+| ---------------- | ------------ | ----------------------------- |
+| `status_id` (PK) | NUMBER       | Unique status ID              |
+| `status_name`    | VARCHAR2(20) | PENDING / APPROVED / REJECTED |
+
+
+CREATE TABLE request_status (
+    status_id NUMBER PRIMARY KEY,
+    status_name VARCHAR2(20) UNIQUE NOT NULL
+);
+---
+
+## 7️⃣ REQUESTS
+
+**Purpose:** Stores customer requests for listings.
+
+| Attribute          | Type   | Description                          |
+| ------------------ | ------ | ------------------------------------ |
+| `request_id` (PK)  | NUMBER | Unique request ID                    |
+| `listing_id` (FK)  | NUMBER | References LISTINGS(listing_id)      |
+| `customer_id` (FK) | NUMBER | References USERS(user_id)            |
+| `request_date`     | DATE   | Date of request                      |
+| `status_id` (FK)   | NUMBER | References REQUEST_STATUS(status_id) |
+
+CREATE TABLE requests (
+    request_id NUMBER PRIMARY KEY,
+    listing_id NUMBER NOT NULL,
+    customer_id NUMBER NOT NULL,
+    request_date DATE DEFAULT SYSDATE,
+    status_id NUMBER NOT NULL,
+
+    CONSTRAINT fk_request_listing
+        FOREIGN KEY (listing_id)
+        REFERENCES listings(listing_id),
+
+    CONSTRAINT fk_request_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES users(user_id),
+
+    CONSTRAINT fk_request_status
+        FOREIGN KEY (status_id)
+        REFERENCES request_status(status_id)
+);
+
+CREATE SEQUENCE seq_requests
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+---
+
+# 🔗 RELATIONSHIP SUMMARY (VERY IMPORTANT)
+
+| Relationship                | Type        |
+| --------------------------- | ----------- |
+| ROLES → USERS               | One-to-Many |
+| USERS (Vendor) → LISTINGS   | One-to-Many |
+| CATEGORIES → LISTINGS       | One-to-Many |
+| LISTING_STATUS → LISTINGS   | One-to-Many |
+| USERS (Customer) → REQUESTS | One-to-Many |
+| LISTINGS → REQUESTS         | One-to-Many |
+| REQUEST_STATUS → REQUESTS   | One-to-Many |
+
+---
+
+
